@@ -11,11 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        //TODO: edit this
-        Schema::create('nodes', function (Blueprint $table) {
+        Schema::create('folders', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->foreignId('parent_id')->nullable()->constrained('folders`')->cascadeOnDelete();
+            $table->foreignId('parent_id')->nullable()->constrained('folders')->cascadeOnDelete();
             $table->timestamps();
             $table->fullText('name');
         });

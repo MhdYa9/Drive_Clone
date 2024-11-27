@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Folder;
 use App\Rules\ValidFolderName;
 use App\Rules\ValidParentFolder;
+use App\Services\FoldersService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -51,6 +52,11 @@ class FolderController extends Controller
     public function update(Request $request, Folder $folder){
 
 
+//        $f = new FoldersService($folder);
+//        $f->getSubFolders();
+
+        return $folder->children;
+
         $type = $request->validate([
             'type'=>'required|string|in:renaming,moving'
         ]);
@@ -70,7 +76,7 @@ class FolderController extends Controller
         }
         else if ($type['type'] == 'moving'){
             $data = $request->validate([
-               'parent_id' => 'required|integer|exists:nodes,id',
+               'parent_id' => 'required|integer|exists:folders,id',
             ]);
 
             Validator::make(['name' => $folder->name,'parent_id'=>$data['parent_id']],

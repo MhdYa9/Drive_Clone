@@ -13,10 +13,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        Folder::create([
-            'name'=>'root',
-            'parent_id'=>null,
-            'type'=>'folder'
-        ]);
+//        Folder::create([
+//            'name'=>'root',
+//            'parent_id'=>null,
+//        ]);
+
+        $this->call(FolderSeeder::class);
     }
 }
