@@ -15,8 +15,7 @@ return new class extends Migration
         Schema::create('nodes', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->foreignId('parent_id')->nullable()->constrained('nodes')->cascadeOnDelete();
-            $table->string("type");
+            $table->foreignId('parent_id')->nullable()->constrained('folders`')->cascadeOnDelete();
             $table->timestamps();
             $table->fullText('name');
         });

@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Node;
+use App\Models\Folder;
 use App\Rules\ValidFolderName;
 use App\Rules\ValidParentFolder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
-class NodeController extends Controller
+class FolderController extends Controller
 {
 
     public function index(){
@@ -32,31 +32,23 @@ class NodeController extends Controller
     }
     public function store(Request $request)
     {
-        $parent = $request->validate(
-            ['parent'=>
-                ['required'
-                ,'integer'
-                ,Rule::prohibitedIf(function (){
-                    $parent = Node::findOrFail(request('parent'));
-                    return $parent->type != 'folder';
-                })
-                ]
-            ])['parent'];
+        $parent = $request->validate([
+            'parent'=> 'required|integer|exists:folders,id'
+        ])['parent'];
 
-        $data = $request->validate([
-            'type'=>'bail|required|string|in:folder,file',
-            'name' => ['required','string','max:255',new ValidFolderName($parent,request('type'))],
-        ]);
+        $name = $request->validate([
+            'name' => ['required','string','max:255',new ValidFolderName($parent)],
+        ])['name'];
 
-        Node::create([
+        Folder::create([
             'parent_id' => $parent,
-            ...$data
+            'name' => $name
         ]);
 
-        return response()->json(['message' => $data['type'].' created'],203);
+        return response()->json(['message' => 'your folder is created'],201);
     }
 
-    public function update(Request $request, Node $folder){
+    public function update(Request $request, Folder $folder){
 
 
         $type = $request->validate([
@@ -72,7 +64,7 @@ class NodeController extends Controller
 
             if($folder->name != $name){
                 $data = $request->validate([
-                    'name'=>[new ValidFolderName($folder->parent_id,$folder->type)]
+                    'name'=>[new ValidFolderName($folder->parent_id)]
                 ]);
             }
         }
@@ -81,19 +73,17 @@ class NodeController extends Controller
                'parent_id' => 'required|integer|exists:nodes,id',
             ]);
 
-            Validator::make([
-                'name' => $folder->name,'parent_id'=>$data['parent_id']],
-                ['name' => new ValidFolderName($data['parent_id'],$type['type']),
+            Validator::make(['name' => $folder->name,'parent_id'=>$data['parent_id']],
+                ['name' => new ValidFolderName($data['parent_id']),
                 'parent_id'=>new ValidParentFolder($folder->id)])->validate();
-            //if
         }
 
 
         $folder->update($data);
-        return response()->json(['message' => 'Node updated']);
+        return response()->json(['message' => 'Folder updated']);
     }
 
-    public function destroy(Node $folder){
+    public function destroy(Folder $folder){
         //TODO: complete the function
     }
 

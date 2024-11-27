@@ -2,7 +2,7 @@
 
 namespace App\Rules;
 
-use App\Models\Node;
+use App\Models\Folder;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
@@ -14,7 +14,7 @@ class ValidFolderName implements ValidationRule
      * @param parent folder id
      * */
 
-    public function __construct(private int $parent_id ,private string $type )
+    public function __construct(private int $parent_id)
     {
 
     }
@@ -26,7 +26,7 @@ class ValidFolderName implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if(Node::whereParentId($this->parent_id)->whereName($value)->whereType($this->type)->exists()){
+        if(Folder::whereParentId($this->parent_id)->whereName($value)->exists()){
             $fail("the name you just entered already exists in the same directory");
         }
     }

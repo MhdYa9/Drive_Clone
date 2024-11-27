@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Node extends Model
+class Folder extends Model
 {
     use HasFactory;
 
@@ -17,11 +17,15 @@ class Node extends Model
     ];
 
     public function parent(){
-        return $this->belongsTo(Node::class);
+        return $this->belongsTo(Folder::class);
     }
 
     public function children(){
-        return $this->hasMany(Node::class);
+        return $this->hasMany(Folder::class);
+    }
+
+    public function scopeSubFolders(){
+
     }
 
 }

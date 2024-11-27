@@ -2,7 +2,7 @@
 
 namespace App\Rules;
 
-use App\Models\Node;
+use App\Models\Folder;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use function Laravel\Prompts\note;
@@ -45,7 +45,7 @@ class ValidParentFolder implements ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         $this->parent = $value;
-        $nodes = Node::select('id','parent_id')->whereType('folder')->get();
+        $nodes = Folder::select('id','parent_id')->whereType('folder')->get();
         foreach ($nodes as $node) {
              $this->adj[$node->parent_id][] = $node->id;
              $this->adj[$node->id] = [];
