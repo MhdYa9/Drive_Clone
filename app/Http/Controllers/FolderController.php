@@ -52,10 +52,9 @@ class FolderController extends Controller
     public function update(Request $request, Folder $folder){
 
 
-//        $f = new FoldersService($folder);
-//        $f->getSubFolders();
+        $f = new FoldersService($folder);
+        return $f->getSubFolders();
 
-        return $folder->children;
 
         $type = $request->validate([
             'type'=>'required|string|in:renaming,moving'
