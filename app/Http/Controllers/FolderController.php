@@ -33,6 +33,8 @@ class FolderController extends Controller
     }
     public function store(Request $request)
     {
+        //tested
+
         $parent = $request->validate([
             'parent'=> 'required|integer|exists:folders,id'
         ])['parent'];
@@ -52,17 +54,13 @@ class FolderController extends Controller
     public function update(Request $request, Folder $folder){
 
 
-        $f = new FoldersService($folder);
-        return $f->getSubFolders();
-
-
         $type = $request->validate([
             'type'=>'required|string|in:renaming,moving'
         ]);
 
         $data = [];
 
-        if($type['type'] == 'renaming'){
+        if($type['type'] == 'renaming') {
             $name = $request->validate([
                 'name' => 'required|string|max:255',
             ])['name'];
@@ -73,14 +71,14 @@ class FolderController extends Controller
                 ]);
             }
         }
-        else if ($type['type'] == 'moving'){
+        else if ($type['type'] == 'moving') {
             $data = $request->validate([
                'parent_id' => 'required|integer|exists:folders,id',
             ]);
 
             Validator::make(['name' => $folder->name,'parent_id'=>$data['parent_id']],
                 ['name' => new ValidFolderName($data['parent_id']),
-                'parent_id'=>new ValidParentFolder($folder->id)])->validate();
+                'parent_id'=>new ValidParentFolder($folder)])->validate();
         }
 
 
@@ -89,7 +87,7 @@ class FolderController extends Controller
     }
 
     public function destroy(Folder $folder){
-        //TODO: complete the function
+        $folder->delete();
     }
 
 
