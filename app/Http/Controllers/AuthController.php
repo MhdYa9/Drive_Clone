@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Folder;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -54,6 +55,10 @@ class AuthController extends Controller
         $data['password'] = Hash::make($data['password']);
 
         $user = User::create($data);
+        Folder::create([
+            'name' => 'root'.$user->id,
+            'user_id' => $user->id
+        ]);
 
         $token = $user->createToken('api-token')->plainTextToken;
 

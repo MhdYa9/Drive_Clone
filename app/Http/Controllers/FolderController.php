@@ -29,17 +29,21 @@ class FolderController extends Controller
     {
         return new FolderResource($folder->load('subFolders','files'));
     }
+
     public function store(Request $request)
     {
-        $parent = Folder::findOrFail($request->parent_id);
+        $user = $request->user();
+
+        $parent = Folder::findOrFail($request->parent);
 
         $name = $request->validate([
-            'name' => ['required','string','max:255',new ValidFolderName($parent)],
+            'name' => ['required','string','max:255',new ValidFolderName($parent->id)],
         ])['name'];
 
         Folder::create([
             'parent_id' => $parent->id,
-            'ancestors' => $parent->id + $parent->ancestors,
+            'ancestors' => ($parent->ancestors?(','.$parent->id.$parent->ancestors):(','.$parent->id.',')),
+            'user_id' => $user->id,
             'name' => $name
         ]);
 
@@ -66,13 +70,15 @@ class FolderController extends Controller
             }
         }
         else if ($type['type'] == 'moving') {
-            $data = $request->validate([
-               'parent_id' => 'required|integer|exists:folders,id',
-            ]);
+            $parent = Folder::findOrFail($request->parent_id);
 
-            Validator::make(['name' => $folder->name,'parent_id'=>$data['parent_id']],
+            $data['parent_id'] = $parent->id;
+
+            Validator::make(['name' => $folder->name,'parent'=>$parent],
                 ['name' => new ValidFolderName($data['parent_id']),
-                'parent_id'=>new ValidParentFolder($folder)])->validate();
+                'parent'=>new ValidParentFolder($folder)])->validate();
+
+            $data['ancestors']  =  ($parent->ancestors?(','.$parent->id.$parent->ancestors):(','.$parent->id.','));
         }
 
 

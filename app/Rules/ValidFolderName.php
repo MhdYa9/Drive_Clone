@@ -14,7 +14,7 @@ class ValidFolderName implements ValidationRule
      * @param parent folder id
      * */
 
-    public function __construct(private int $parent_id)
+    public function __construct(private int $parent)
     {
 
     }
@@ -26,7 +26,7 @@ class ValidFolderName implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if(Folder::whereParentId($this->parent_id)->whereName($value)->exists()){
+        if(Folder::whereParentId($this->parent)->whereName($value)->exists()){
             $fail("the name you just entered already exists in the same directory");
         }
     }

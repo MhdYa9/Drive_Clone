@@ -19,10 +19,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-
-Route::apiResource('folders',FolderController::class);
-
-
+Route::middleware('auth:sanctum')->group(function () {
+    Route::apiResource('folders',FolderController::class);
+});
 
 Route::fallback(function(){
     return response()->json([

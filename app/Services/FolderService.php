@@ -46,6 +46,11 @@ class FolderService
         return $folders;
     }
 
+    private function quickFetch()
+    {
+
+    }
+
     public function getChildren($type = 'bfs'){
         switch ($type){
             case 'bfs':
@@ -57,20 +62,29 @@ class FolderService
         }
     }
 
-    public function validDestParent(int $destParent)
+    public function validDestParent(Folder $destParent)
     {
-        if($destParent == $this->folder->id) return false;
-        return $this->bfs(function (array $folders) use ($destParent){
-            return in_array($destParent,$folders);
-        });
+
+//        if($destParent->id == $this->folder->id) return false;
+//        return $this->bfs(function (array $folders) use ($destParent){
+//            return in_array($destParent->id,$folders);
+//        });
+
+        //-------------------------------------------------------
+
+        //the folder shall not be a child of mine, hence I should not be an ancestor of his
+        $ancestors = $destParent->ancestorsArray;
+        return !in_array($this->folder->id,$ancestors);
+
     }
+
 
     public function deleteSubTree($hard_delete = 0,$type = 'bfs')
     {
         if($hard_delete){
             $this->folder->forceDelete();
         }
-        $subtree=  [$this->folder->id,...$this->getChildren()];
+        $subtree=  [$this->folder->id,...$this->getChildren($type)];
         Folder::whereIn('id',$subtree)->delete();
         File::whereIn('parent_id',$subtree)->delete();
     }

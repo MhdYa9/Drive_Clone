@@ -21,7 +21,7 @@ class ValidParentFolder implements ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         $folder_service = new FolderService($this->folder);
-        if($folder_service->validDestParent($value)){
+        if(!$folder_service->validDestParent($value)){
             $fail("you cannot move a parent to a subfolder");
         }
     }
