@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\FolderResource;
 use App\Models\Folder;
 use App\Rules\ValidFolderName;
 use App\Rules\ValidParentFolder;
@@ -17,24 +18,19 @@ class FolderController extends Controller
         //TODO: complete the function
     }
 
-    /*
-     *
+    /* *
      * crud folder
      * delete every thing under the folder and the folder itself
-     * seperate fodler and file models
-     * improve query complexity on dfs
      * premissions for folders read and write and crud on it
      * search on folders and files
      * */
 
-    public function show()
+    public function show(Folder $folder)
     {
-        //TODO: complete the function
+        return new FolderResource($folder->load('subFolders','files'));
     }
     public function store(Request $request)
     {
-        //tested
-
         $parent = $request->validate([
             'parent'=> 'required|integer|exists:folders,id'
         ])['parent'];
@@ -52,7 +48,6 @@ class FolderController extends Controller
     }
 
     public function update(Request $request, Folder $folder){
-
 
         $type = $request->validate([
             'type'=>'required|string|in:renaming,moving'

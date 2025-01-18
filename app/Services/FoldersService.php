@@ -45,7 +45,7 @@ class FoldersService
         return $folders;
     }
 
-    public function getSubFolders($type = 'bfs'){
+    public function getChildren($type = 'bfs'){
         switch ($type){
             case 'bfs':
                 return $this->bfs();

@@ -22,8 +22,13 @@ class Folder extends Model
         return $this->belongsTo(Folder::class, 'parent_id');
     }
 
-    public function children(){
+    public function subFolders(){
         return $this->hasMany(Folder::class,'parent_id');
+    }
+
+    public function files()
+    {
+        return $this->hasMany(File::class);
     }
 
 
