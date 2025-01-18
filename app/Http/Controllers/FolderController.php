@@ -6,7 +6,7 @@ use App\Http\Resources\FolderResource;
 use App\Models\Folder;
 use App\Rules\ValidFolderName;
 use App\Rules\ValidParentFolder;
-use App\Services\FoldersService;
+use App\Services\FolderService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -82,7 +82,14 @@ class FolderController extends Controller
     }
 
     public function destroy(Folder $folder){
-        $folder->delete();
+
+        $hard_delete = request('hard_delete');
+
+        $folder_service = new FolderService($folder);
+        $folder_service->deleteSubTree(hard_delete:$hard_delete);
+
+        return response()->json(['message' => 'Folder deleted'],203);
+
     }
 
 

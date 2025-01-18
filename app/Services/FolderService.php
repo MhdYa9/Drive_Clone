@@ -2,10 +2,11 @@
 
 namespace App\Services;
 
+use App\Models\File;
 use App\Models\Folder;
 use Illuminate\Support\Facades\DB;
 
-class FoldersService
+class FolderService
 {
 
     private Folder $folder;
@@ -58,9 +59,20 @@ class FoldersService
 
     public function validDestParent(int $destParent)
     {
+        if($destParent == $this->folder->id) return false;
         return $this->bfs(function (array $folders) use ($destParent){
             return in_array($destParent,$folders);
         });
+    }
+
+    public function deleteSubTree($hard_delete = 0,$type = 'bfs')
+    {
+        if($hard_delete){
+            $this->folder->forceDelete();
+        }
+        $subtree=  [$this->folder->id,...$this->getChildren()];
+        Folder::whereIn('id',$subtree)->delete();
+        File::whereIn('parent_id',$subtree)->delete();
     }
 
 

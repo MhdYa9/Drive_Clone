@@ -15,8 +15,11 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('path');
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('folder_id')->constrained()->cascadeOnDelete();
+            $table->softDeletes();
             $table->timestamps();
+            $table->fullText('name');
         });
     }
 
