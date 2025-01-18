@@ -15,6 +15,8 @@ class Folder extends Model
     protected $fillable = [
         'name',
         'type',
+        'ancestors',
+        'user_id',
         'parent_id',
     ];
 
@@ -30,6 +32,11 @@ class Folder extends Model
     public function files()
     {
         return $this->hasMany(File::class);
+    }
+
+    public function getAncestorsArrayAttribute()
+    {
+        return explode(',',$this->ancestors);
     }
 
 

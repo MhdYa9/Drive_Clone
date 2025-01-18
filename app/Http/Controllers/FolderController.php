@@ -31,16 +31,15 @@ class FolderController extends Controller
     }
     public function store(Request $request)
     {
-        $parent = $request->validate([
-            'parent'=> 'required|integer|exists:folders,id'
-        ])['parent'];
+        $parent = Folder::findOrFail($request->parent_id);
 
         $name = $request->validate([
             'name' => ['required','string','max:255',new ValidFolderName($parent)],
         ])['name'];
 
         Folder::create([
-            'parent_id' => $parent,
+            'parent_id' => $parent->id,
+            'ancestors' => $parent->id + $parent->ancestors,
             'name' => $name
         ]);
 

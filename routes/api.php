@@ -24,8 +24,6 @@ Route::apiResource('folders',FolderController::class);
 
 
 
-
-
 Route::fallback(function(){
     return response()->json([
         'message'=>'this route does not exist'
