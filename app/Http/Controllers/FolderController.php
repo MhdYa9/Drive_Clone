@@ -15,12 +15,19 @@ class FolderController extends Controller
 {
 
     public function index(){
-        //TODO: complete the function
+
+        $data = request()->validate([
+            'folder_id' => 'required',
+            'search' => 'required|string'
+        ]);
+
+        $fs = new FolderService(Folder::findOrFail($data['folder_id']));
+        $folders = Folder::where('');
+
     }
 
     /* *
      * crud folder
-     * delete every thing under the folder and the folder itself
      * premissions for folders read and write and crud on it
      * search on folders and files
      * */
@@ -56,8 +63,6 @@ class FolderController extends Controller
             'type'=>'required|string|in:renaming,moving'
         ]);
 
-        $data = [];
-
         if($type['type'] == 'renaming') {
             $name = $request->validate([
                 'name' => 'required|string|max:255',
@@ -67,33 +72,34 @@ class FolderController extends Controller
                 $data = $request->validate([
                     'name'=>[new ValidFolderName($folder->parent_id)]
                 ]);
+                $folder->update($data);
             }
         }
         else if ($type['type'] == 'moving') {
             $parent = Folder::findOrFail($request->parent_id);
 
-            $data['parent_id'] = $parent->id;
-
             Validator::make(['name' => $folder->name,'parent'=>$parent],
-                ['name' => new ValidFolderName($data['parent_id']),
+                ['name' => new ValidFolderName($parent->id),
                 'parent'=>new ValidParentFolder($folder)])->validate();
 
-            $data['ancestors']  =  ($parent->ancestors?(','.$parent->id.$parent->ancestors):(','.$parent->id.','));
+            $fs = new FolderService($folder);
+            $fs->updateAncestors($parent);
         }
 
 
-        $folder->update($data);
         return response()->json(['message' => 'Folder updated']);
     }
 
-    public function destroy(Folder $folder){
+    public function destroy(int $folder){
+
+        $folder = Folder::where('id',$folder)->withTrashed()->first();
 
         $hard_delete = request('hard_delete');
 
         $folder_service = new FolderService($folder);
         $folder_service->deleteSubTree(hard_delete:$hard_delete);
 
-        return response()->json(['message' => 'Folder deleted'],203);
+        return response()->json(['message' => 'Folder deleted'],204);
 
     }
 

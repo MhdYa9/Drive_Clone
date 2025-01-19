@@ -18,8 +18,11 @@ class FolderService
 
     private function recursiveCTE()
     {
-        $query ="WITH RECURSIVE subfolders AS (SELECT * FROM folders where id = {$this->folder->id} UNION ALL SELECT f.* FROM folders f JOIN subfolders sf ON sf.id = f.parent_id) SELECT * FROM subfolders";
+        $query ="WITH RECURSIVE subfolders AS (SELECT id FROM folders where id = {$this->folder->id} UNION ALL SELECT f.id FROM folders f JOIN subfolders sf ON sf.id = f.parent_id) SELECT * FROM subfolders";
         $folders = DB::select($query);
+        $folders = array_map(function ($item) {
+            return $item->id;
+        },$folders);
 
         return $folders;
     }
@@ -48,17 +51,22 @@ class FolderService
 
     private function quickFetch()
     {
-
+        $folders = Folder::select('id')
+            ->where('ancestors','like','%,'.$this->folder->id.',%')
+            ->pluck('id')->toArray();
+        return $folders;
     }
 
-    public function getChildren($type = 'bfs'){
+    public function getChildrenIds($type = 'quick'){
         switch ($type){
             case 'bfs':
                 return $this->bfs();
-                break;
-            default:
+            case 'quick':
+                return $this->quickFetch();
+            case 'rec':
                 return $this->recursiveCTE();
-                break;
+            default:
+                return [];
         }
     }
 
@@ -78,15 +86,26 @@ class FolderService
 
     }
 
+    public function updateAncestors(Folder $destParent)
+    {
+        $old_ancestors =$this->folder->ancestors;
+        $new_ancestors = ','.($destParent->ancestors?($destParent->id.$destParent->ancestors):($destParent->id.','));
+        $this->folder->update([
+            'parent_id' => $destParent->id,
+            'ancestors' => $new_ancestors
+        ]);
+        DB::statement("UPDATE folders SET ancestors = REPLACE(ancestors,'{$old_ancestors}','{$new_ancestors}') WHERE ancestors like '%,{$this->folder->id},%'");
+    }
 
-    public function deleteSubTree($hard_delete = 0,$type = 'bfs')
+
+    public function deleteSubTree($hard_delete = 0,$type = 'quick')
     {
         if($hard_delete){
             $this->folder->forceDelete();
         }
-        $subtree=  [$this->folder->id,...$this->getChildren($type)];
+        $subtree=  [$this->folder->id,...$this->getChildrenIds($type)];
         Folder::whereIn('id',$subtree)->delete();
-        File::whereIn('parent_id',$subtree)->delete();
+        File::whereIn('folder_id',$subtree)->delete();
     }
 
 

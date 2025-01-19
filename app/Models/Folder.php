@@ -29,6 +29,11 @@ class Folder extends Model
         return $this->hasMany(Folder::class,'parent_id');
     }
 
+    public function children()
+    {
+        return $this->where('ancestors','like','%,'.$this->folder->id.',%');
+    }
+
     public function files()
     {
         return $this->hasMany(File::class);
