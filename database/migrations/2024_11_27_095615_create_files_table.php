@@ -14,12 +14,12 @@ return new class extends Migration
         Schema::create('files', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->index('name');
             $table->string('path');
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('folder_id')->constrained()->cascadeOnDelete();
             $table->softDeletes();
             $table->timestamps();
-            $table->fullText('name');
         });
     }
 

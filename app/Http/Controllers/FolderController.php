@@ -9,7 +9,6 @@ use App\Rules\ValidParentFolder;
 use App\Services\FolderService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 
 class FolderController extends Controller
 {
@@ -17,19 +16,18 @@ class FolderController extends Controller
     public function index(){
 
         $data = request()->validate([
-            'folder_id' => 'required',
+            'folder' => 'required|integer|exists:folders,id',
             'search' => 'required|string'
         ]);
 
-        $fs = new FolderService(Folder::findOrFail($data['folder_id']));
-        $folders = Folder::where('');
+        $folders = Folder::where('name','like','%'.$data['search']. '%')
+            ->where('ancestors','like','%,'.$data['folder'].',%')->get();
+        return FolderResource::collection($folders);
 
     }
 
     /* *
-     * crud folder
      * premissions for folders read and write and crud on it
-     * search on folders and files
      * */
 
     public function show(Folder $folder)

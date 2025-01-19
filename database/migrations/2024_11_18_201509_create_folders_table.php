@@ -19,7 +19,6 @@ return new class extends Migration
             $table->text('ancestors')->nullable();
             $table->softDeletes();
             $table->timestamps();
-            $table->fullText('name');
         });
     }
 
