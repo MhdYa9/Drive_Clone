@@ -15,7 +15,11 @@ class FolderController extends Controller
 
     public function index(){
 
-        $data = request()->validate([
+    }
+
+    public function search(Request $request)
+    {
+        $data = $request->validate([
             'folder' => 'required|integer|exists:folders,id',
             'search' => 'required|string'
         ]);
@@ -23,34 +27,35 @@ class FolderController extends Controller
         $folders = Folder::where('name','like','%'.$data['search']. '%')
             ->where('ancestors','like','%,'.$data['folder'].',%')->get();
         return FolderResource::collection($folders);
-
     }
 
     /* *
-     * premissions for folders read and write and crud on it
+     * permissions for folders read and write and crud on it
      * */
 
     public function show(Folder $folder)
     {
+        $this->authorize('view', $folder);
         return new FolderResource($folder->load('subFolders','files'));
     }
 
     public function store(Request $request)
     {
         $user = $request->user();
-
         $parent = Folder::findOrFail($request->parent);
 
         $name = $request->validate([
             'name' => ['required','string','max:255',new ValidFolderName($parent->id)],
         ])['name'];
 
-        Folder::create([
+        $folder = Folder::create([
             'parent_id' => $parent->id,
             'ancestors' => ($parent->ancestors?(','.$parent->id.$parent->ancestors):(','.$parent->id.',')),
             'user_id' => $user->id,
             'name' => $name
         ]);
+
+        $user->foldersPermissons()->attach($folder->id,['name'=>'rwd']);
 
         return response()->json(['message' => 'your folder is created'],201);
     }

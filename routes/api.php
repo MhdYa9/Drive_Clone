@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FolderController;
+use App\Http\Controllers\PermissionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,7 +21,10 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::apiResource('folders',FolderController::class);
+    Route::get('/folders/search', [FolderController::class, 'search'])->name('folders.search');
+    Route::apiResource('folders',FolderController::class)->except('index');
+    Route::post('/permissions',[PermissionController::class,'store'])->name('permissions.store');
+    Route::delete('/permissions',[PermissionController::class,'destroy'])->name('permissions.destroy');
 });
 
 Route::fallback(function(){

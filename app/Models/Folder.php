@@ -39,10 +39,23 @@ class Folder extends Model
         return $this->hasMany(File::class);
     }
 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function usersPermissions()
+    {
+        return $this->belongsToMany(User::class,'permissions','folder_id','user_id')
+            ->withPivot('permission');
+    }
+
     public function getAncestorsArrayAttribute()
     {
         return explode(',',$this->ancestors);
     }
+
+
 
 
 }

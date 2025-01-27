@@ -42,4 +42,9 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public function foldersPermissions()
+    {
+        return $this->belongsToMany(Folder::class,'permissions','user_id','folder_id');
+    }
 }
