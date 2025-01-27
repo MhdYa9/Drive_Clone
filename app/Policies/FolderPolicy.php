@@ -12,6 +12,18 @@ class FolderPolicy
     /**
      * Determine whether the user can view any models.
      */
+
+
+    private function permission(User $user, Folder $folder)
+    {
+        $permission = DB::table('permissions')
+            ->select('permission')
+            ->where('user_id', $user->id)
+            ->where('folder_id', $folder->id)->first()?->permission;
+
+        return $permission;
+    }
+
     public function viewAny(User $user): bool
     {
         return 0;
@@ -22,11 +34,8 @@ class FolderPolicy
      */
     public function view(User $user, Folder $folder): bool
     {
-        $user_permission = DB::table('permissions')
-                ->select('permission')
-                ->where('user_id', $user->id)
-                ->where('folder_id', $folder->id)->first()?->permission;
-        return $user_permission !== null && $user_permission['1'] == 'r';
+        $permission = $this->permission($user, $folder);
+        return $permission !== null && $permission['1'] == 'r';
     }
 
     /**
@@ -34,8 +43,8 @@ class FolderPolicy
      */
     public function create(User $user,Folder $parent): bool
     {
-        return 0;
-
+        $permission = $this->permission($user, $parent);
+        return $permission !== null && $permission['1'] == 'r';
     }
 
     /**

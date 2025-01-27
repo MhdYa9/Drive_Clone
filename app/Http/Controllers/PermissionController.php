@@ -27,11 +27,6 @@ class PermissionController extends Controller
 
         Gate::authorize('isOwner',$folder);
 
-        //sorting the array:
-        $data['permission'] = str_split($data['permission']);
-        sort($data['permission']);
-        $data['permission'] = implode($data['permission']);
-
 
         $user->foldersPermissions()->syncWithoutDetaching([$data['folder'] => ['permission'=>$data['permission']]]);
         return response()->json(['message'=>'permissions created successfully'],201);
@@ -53,5 +48,27 @@ class PermissionController extends Controller
         $user->foldersPermissions()->detach($data['folder']);
 
         return response()->json(['message'=>'permissions deleted successfully'],203);
+    }
+
+
+    private function permissionFormatter(String  $permissions)
+    {
+        //sorting the array:
+        $str = '';
+        $permissions = str_split($permissions);
+        sort($permissions);
+        $arr = ['d','r','w'];
+
+        $j = 0;
+        for($i=0;$i<count($arr);$i++){
+            if($j>=count($permissions) ||$permissions[$j] != $arr[$i]){
+                $str .= '_';
+            }
+            else if($permissions[$j] == $arr[$i]){
+                $str.=$permissions[$j];
+                $j++;
+            }
+        }
+        return $str;
     }
 }
