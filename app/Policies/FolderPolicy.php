@@ -32,7 +32,7 @@ class FolderPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Folder $folder): bool
+    public function read(User $user, Folder $folder): bool
     {
         $permission = $this->permission($user, $folder);
         return $permission !== null && $permission['1'] == 'r';
@@ -41,19 +41,10 @@ class FolderPolicy
     /**
      * Determine whether the user can create models.
      */
-    public function create(User $user,Folder $parent): bool
+    public function write(User $user,Folder $parent): bool
     {
         $permission = $this->permission($user, $parent);
-        return $permission !== null && $permission['1'] == 'r';
-    }
-
-    /**
-     * Determine whether the user can update the model.
-     */
-    public function update(User $user, Folder $folder): bool
-    {
-        return 0;
-
+        return $permission !== null && $permission['2'] == 'w';
     }
 
     /**
@@ -61,25 +52,9 @@ class FolderPolicy
      */
     public function delete(User $user, Folder $folder): bool
     {
-        return 0;
-
+        $permission = $this->permission($user, $folder);
+        return $permission !== null && $permission['0'] == 'd';
     }
 
-    /**
-     * Determine whether the user can restore the model.
-     */
-    public function restore(User $user, Folder $folder): bool
-    {
-        return 0;
 
-    }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
-    public function forceDelete(User $user, Folder $folder): bool
-    {
-        return 0;
-
-    }
 }

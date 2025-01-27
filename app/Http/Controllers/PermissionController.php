@@ -27,7 +27,7 @@ class PermissionController extends Controller
 
         Gate::authorize('isOwner',$folder);
 
-
+        $data['permission'] = $this->permissionFormatter($data['permission']);
         $user->foldersPermissions()->syncWithoutDetaching([$data['folder'] => ['permission'=>$data['permission']]]);
         return response()->json(['message'=>'permissions created successfully'],201);
     }

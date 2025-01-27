@@ -35,7 +35,7 @@ class FolderController extends Controller
 
     public function show(Folder $folder)
     {
-        $this->authorize('view', $folder);
+        $this->authorize('read', $folder);
         return new FolderResource($folder->load('subFolders','files'));
     }
 
@@ -43,6 +43,7 @@ class FolderController extends Controller
     {
         $user = $request->user();
         $parent = Folder::findOrFail($request->parent);
+        $this->authorize('write', $parent);
 
         $name = $request->validate([
             'name' => ['required','string','max:255',new ValidFolderName($parent->id)],
@@ -55,13 +56,14 @@ class FolderController extends Controller
             'name' => $name
         ]);
 
-        $user->foldersPermissons()->attach($folder->id,['name'=>'rwd']);
+        $user->foldersPermissions()->attach($folder->id,['permission'=>'drw']);
 
         return response()->json(['message' => 'your folder is created'],201);
     }
 
     public function update(Request $request, Folder $folder){
 
+        $this->authorize('write', $folder);
         $type = $request->validate([
             'type'=>'required|string|in:renaming,moving'
         ]);
@@ -80,7 +82,7 @@ class FolderController extends Controller
         }
         else if ($type['type'] == 'moving') {
             $parent = Folder::findOrFail($request->parent_id);
-
+            $this->authorize('write', $parent);
             Validator::make(['name' => $folder->name,'parent'=>$parent],
                 ['name' => new ValidFolderName($parent->id),
                 'parent'=>new ValidParentFolder($folder)])->validate();
@@ -96,14 +98,17 @@ class FolderController extends Controller
     public function destroy(int $folder){
 
         $folder = Folder::where('id',$folder)->withTrashed()->first();
-
+        $this->authorize('delete', $folder);
         $hard_delete = request('hard_delete');
 
         $folder_service = new FolderService($folder);
         $folder_service->deleteSubTree(hard_delete:$hard_delete);
 
         return response()->json(['message' => 'Folder deleted'],204);
+    }
 
+    public function restore(int $folder){
+        //complete the fucntion
     }
 
 
