@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\FolderResource;
 use App\Models\Folder;
+use App\Models\User;
 use App\Rules\ValidFolderName;
 use App\Rules\ValidParentFolder;
 use App\Services\FolderService;
+use App\Services\PermissionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -55,8 +57,9 @@ class FolderController extends Controller
             'user_id' => $user->id,
             'name' => $name
         ]);
-
-        $user->foldersPermissions()->attach($folder->id,['permission'=>'drw']);
+        
+        $ps = new PermissionService($folder);
+        $ps->permitAncestorsOwners();
 
         return response()->json(['message' => 'your folder is created'],201);
     }
@@ -81,8 +84,11 @@ class FolderController extends Controller
             }
         }
         else if ($type['type'] == 'moving') {
+
             $parent = Folder::findOrFail($request->parent_id);
+            //check if I have writing access to folder I am moving to
             $this->authorize('write', $parent);
+
             Validator::make(['name' => $folder->name,'parent'=>$parent],
                 ['name' => new ValidFolderName($parent->id),
                 'parent'=>new ValidParentFolder($folder)])->validate();

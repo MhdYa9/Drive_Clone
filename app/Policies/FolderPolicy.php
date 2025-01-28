@@ -56,5 +56,14 @@ class FolderPolicy
         return $permission !== null && $permission['0'] == 'd';
     }
 
+    public function fullAccess(User $user, Folder $folder,?User $target_user = null): bool
+    {
+        if($target_user !== null){
+            $user = $target_user;
+        }
+        $permission = $this->permission($user, $folder);
+        return $permission == 'drw';
+    }
+
 
 }

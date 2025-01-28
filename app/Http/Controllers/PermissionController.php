@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Folder;
 use App\Models\User;
+use App\Services\PermissionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
@@ -28,7 +29,8 @@ class PermissionController extends Controller
         Gate::authorize('isOwner',$folder);
 
         $data['permission'] = $this->permissionFormatter($data['permission']);
-        $user->foldersPermissions()->syncWithoutDetaching([$data['folder'] => ['permission'=>$data['permission']]]);
+        $ps = new PermissionService($folder);
+        $ps->addPermissionsToChildren($user,$data['permission']);
         return response()->json(['message'=>'permissions created successfully'],201);
     }
 
@@ -45,7 +47,8 @@ class PermissionController extends Controller
 
         Gate::authorize('isOwner',$folder);
 
-        $user->foldersPermissions()->detach($data['folder']);
+        $ps = new PermissionService($folder);
+        $ps->removePermissionsFromChildren($user);
 
         return response()->json(['message'=>'permissions deleted successfully'],203);
     }
