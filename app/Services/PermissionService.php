@@ -14,7 +14,8 @@ class PermissionService
 
     public function permitAncestorsOwners(string $permission = 'drw')
     {
-        $ancestors = array_merge($this->folder->ancestorsArray,$this->folder->id);
+        $ancestors = $this->folder->ancestorsArray;
+        $ancestors[] = $this->folder->id;
         $user_ids = Folder::whereIn('id', $ancestors)
             ->select('user_id')
             ->distinct()
@@ -29,7 +30,8 @@ class PermissionService
     }
 
     public function removeAncestorsOwnersPermissions(){
-        $ancestors = array_merge($this->folder->ancestorsArray,$this->folder->id);
+        $ancestors = $this->folder->ancestorsArray;
+        $ancestors[] = $this->folder->id;
         $user_ids = Folder::whereIn('id', $ancestors)
             ->select('user_id')
             ->distinct()
@@ -42,7 +44,8 @@ class PermissionService
     public function addPermissionsToChildren(User $user,string $permission)
     {
         $fs = new FolderService($this->folder);
-        $children = array_merge($fs->getChildrenIds(),$this->folder->id);
+        $children = $fs->getChildrenIds();
+        $children[] = $this->folder->id;
 
         $permissions = [];
         foreach ($children as $child) {
@@ -56,8 +59,10 @@ class PermissionService
     public function removePermissionsFromChildren(User $user)
     {
         $fs = new FolderService($this->folder);
-        $children = array_merge($fs->getChildrenIds(),$this->folder->id);
-        $user->foldersPermissions()->detach($children);
+        $children = $fs->getChildrenIds();
+        if($user->foldersPermissions()->detach($this->folder->id)){
+            $user->foldersPermissions()->detach($children);
+        }
         return true;
     }
 

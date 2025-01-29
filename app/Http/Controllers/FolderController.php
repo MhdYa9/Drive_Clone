@@ -26,7 +26,28 @@ class FolderController extends Controller
      * */
 
     public function index(){
-        //TODO: complete function
+
+        $user = \request()->user();
+
+        $folders = Folder::whereHas('usersPermissions', function ($query) use ($user) {
+                    return $query->where('users.id', $user->id)
+                            ->where('permissions.permission', 'like', '%r%');
+                    })
+                    ->where(function ($query) use ($user) {
+                        $query->whereNull('parent_id')
+                            ->orWhereNotIn('parent_id', function ($subQuery) use ($user) {
+                                $subQuery->select('folders.id')
+                                    ->from('folders')
+                                    ->join('permissions', 'folders.id', '=', 'permissions.folder_id')
+                                    ->join('users', 'permissions.user_id', '=', 'users.id')
+                                    ->where('users.id', $user->id)
+                                    ->where('permissions.permission', 'like', '%r%');
+                            });
+                    })
+                    ->get();
+
+        return FolderResource::collection($folders);
+
     }
 
     public function search(Request $request)
@@ -103,7 +124,9 @@ class FolderController extends Controller
                 ['name' => new ValidFolderName($parent->id),
                 'parent'=>new ValidParentFolder($folder)])->validate();
 
-            $permission = $folder->usersPermissions()->where('user_id',$folder->user_id)->first()->permission;
+            $permission = $folder->usersPermissions()
+                ->where('user_id',$folder->user_id)
+                ->first()->pivot->permission;
 
             //remove old ancestors owners permissions
             $ps = new PermissionService($folder);
@@ -118,8 +141,6 @@ class FolderController extends Controller
             $folder->usersPermissions()->syncWithoutDetaching([$folder->user_id => ['permission'=>'drw']]);
 
         }
-
-
         return response()->json(['message' => 'Folder updated']);
     }
 
@@ -136,7 +157,16 @@ class FolderController extends Controller
     }
 
     public function restore(int $folder){
-        //complete the function
+
+        $folder = Folder::onlyTrashed()->find($folder);
+        $this->authorize('delete', $folder);
+        $folder->restore();
+        return response()->json(['message' => 'Folder restored'],204);
+    }
+
+    public function overwrite()
+    {
+        //TODO: complete this function
     }
 
 

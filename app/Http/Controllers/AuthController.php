@@ -55,10 +55,12 @@ class AuthController extends Controller
         $data['password'] = Hash::make($data['password']);
 
         $user = User::create($data);
-        Folder::create([
+        $root = Folder::create([
             'name' => 'root'.$user->id,
             'user_id' => $user->id
         ]);
+
+        $root->usersPermissions()->attach([$user->id=>['permission'=>'drw']]);
 
         $token = $user->createToken('api-token')->plainTextToken;
 

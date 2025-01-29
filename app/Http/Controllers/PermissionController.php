@@ -50,7 +50,7 @@ class PermissionController extends Controller
         $ps = new PermissionService($folder);
         $ps->removePermissionsFromChildren($user);
 
-        return response()->json(['message'=>'permissions deleted successfully'],203);
+        return response()->json(['message'=>'permissions deleted successfully'],204);
     }
 
 
