@@ -12,8 +12,7 @@ class PermissionService
 
     }
 
-
-    public function permitAncestorsOwners()
+    public function permitAncestorsOwners(string $permission = 'drw')
     {
         $ancestors = array_merge($this->folder->ancestorsArray,$this->folder->id);
         $user_ids = Folder::whereIn('id', $ancestors)
@@ -23,9 +22,20 @@ class PermissionService
 
         $users_permissions = [];
         foreach ($user_ids as $user_id) {
-            $users_permissions[$user_id] = ['permission'=>'drw'];
+            $users_permissions[$user_id] = ['permission'=>$permission];
         }
         $this->folder->usersPermissions()->syncWithoutDetaching($users_permissions);
+        return true;
+    }
+
+    public function removeAncestorsOwnersPermissions(){
+        $ancestors = array_merge($this->folder->ancestorsArray,$this->folder->id);
+        $user_ids = Folder::whereIn('id', $ancestors)
+            ->select('user_id')
+            ->distinct()
+            ->pluck('user_id')->toArray();
+
+        $this->folder->usersPermissions()->detach($user_ids);
         return true;
     }
 

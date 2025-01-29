@@ -15,8 +15,18 @@ use Illuminate\Support\Facades\Validator;
 class FolderController extends Controller
 {
 
-    public function index(){
 
+    /*
+     *
+     * actions:
+     * filtering: filter (size,...)
+     * observers
+     *
+     *
+     * */
+
+    public function index(){
+        //TODO: complete function
     }
 
     public function search(Request $request)
@@ -57,7 +67,7 @@ class FolderController extends Controller
             'user_id' => $user->id,
             'name' => $name
         ]);
-        
+
         $ps = new PermissionService($folder);
         $ps->permitAncestorsOwners();
 
@@ -93,8 +103,20 @@ class FolderController extends Controller
                 ['name' => new ValidFolderName($parent->id),
                 'parent'=>new ValidParentFolder($folder)])->validate();
 
+            $permission = $folder->usersPermissions()->where('user_id',$folder->user_id)->first()->permission;
+
+            //remove old ancestors owners permissions
+            $ps = new PermissionService($folder);
+            $ps->removeAncestorsOwnersPermissions();
+
             $fs = new FolderService($folder);
             $fs->updateAncestors($parent);
+            //add permissions to new ancestors owners
+            $ps->permitAncestorsOwners($permission);
+
+            //restore permission to owner of the file
+            $folder->usersPermissions()->syncWithoutDetaching([$folder->user_id => ['permission'=>'drw']]);
+
         }
 
 
@@ -114,7 +136,7 @@ class FolderController extends Controller
     }
 
     public function restore(int $folder){
-        //complete the fucntion
+        //complete the function
     }
 
 
