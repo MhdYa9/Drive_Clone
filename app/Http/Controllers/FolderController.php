@@ -4,13 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\FolderResource;
 use App\Models\Folder;
-use App\Models\User;
 use App\Rules\ValidFolderName;
 use App\Rules\ValidParentFolder;
 use App\Services\FolderService;
 use App\Services\PermissionService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class FolderController extends Controller
 {
@@ -128,17 +130,12 @@ class FolderController extends Controller
                 ->where('user_id',$folder->user_id)
                 ->first()->pivot->permission;
 
-            //remove old ancestors owners permissions
             $ps = new PermissionService($folder);
-            $ps->removeAncestorsOwnersPermissions();
 
             $fs = new FolderService($folder);
             $fs->updateAncestors($parent);
             //add permissions to new ancestors owners
             $ps->permitAncestorsOwners($permission);
-
-            //restore permission to owner of the file
-            $folder->usersPermissions()->syncWithoutDetaching([$folder->user_id => ['permission'=>'drw']]);
 
         }
         return response()->json(['message' => 'Folder updated']);
@@ -167,6 +164,29 @@ class FolderController extends Controller
     public function overwrite()
     {
         //TODO: complete this function
+    }
+
+    public function copy()
+    {
+        //TODO: complete this function
+    }
+
+    public function moveOwnership()
+    {
+        $data = request()->validate([
+            'user'=>'required|integer|exists:users,id',
+            'folder'=>'required|integer',
+        ]);
+
+        $folder = Folder::findOrFail($data['folder']);
+
+        Gate::authorize('isOwner',$folder);
+
+        $folder->update([
+            'user_id' => $data['user']
+        ]);
+
+        return response()->json(['message' => 'Folder updated']);
     }
 
 

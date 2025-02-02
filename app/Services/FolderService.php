@@ -15,6 +15,11 @@ class FolderService
         $this->folder = $folder;
     }
 
+    public function setFolder(Folder $folder)
+    {
+        $this->folder = $folder;
+    }
+
 
     private function recursiveCTE()
     {
