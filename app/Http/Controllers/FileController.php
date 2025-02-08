@@ -2,13 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\FileResource;
 use App\Models\File;
 use App\Models\Folder;
 use App\Rules\ValidFolderName;
-use App\Rules\ValidParentFolder;
-use App\Services\FolderService;
-use App\Services\PermissionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -116,7 +112,7 @@ class FileController extends Controller
             ]);
 
         }
-        return response()->json(['message' => 'Folder updated']);
+        return response()->json(['message' => 'file updated']);
     }
 
     /**
@@ -145,5 +141,10 @@ class FileController extends Controller
         }
         $file->restore();
         return response()->json(['message' => 'Folder restored'],204);
+    }
+
+    public function download()
+    {
+
     }
 }

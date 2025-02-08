@@ -16,35 +16,13 @@ class FolderController extends Controller
 {
 
 
-    /*
-     *
-     * actions:
-     * filtering: filter (size,...)
-     * observers
-     *
-     *
-     * */
-
     public function index(){
 
         $user = \request()->user();
 
-        $folders = Folder::whereHas('usersPermissions', function ($query) use ($user) {
-                    return $query->where('users.id', $user->id)
-                            ->where('permissions.permission', 'like', '%r%');
-                    })
-                    ->where(function ($query) use ($user) {
-                        $query->whereNull('parent_id')
-                            ->orWhereNotIn('parent_id', function ($subQuery) use ($user) {
-                                $subQuery->select('folders.id')
-                                    ->from('folders')
-                                    ->join('permissions', 'folders.id', '=', 'permissions.folder_id')
-                                    ->join('users', 'permissions.user_id', '=', 'users.id')
-                                    ->where('users.id', $user->id)
-                                    ->where('permissions.permission', 'like', '%r%');
-                            });
-                    })
-                    ->get();
+        $fs = new FolderService();
+
+        $folders = $fs->getSharedFolder($user);
 
         return FolderResource::collection($folders);
 
@@ -157,10 +135,17 @@ class FolderController extends Controller
         $folder = Folder::onlyTrashed()->find($folder);
         $this->authorize('delete', $folder);
         if(Folder::where('id', $folder->parent_id)->onlyTrashed()->exists() !== null){
-            throw ValidationException::withMessages(['cannot restore folder when parent is deleted']);
+            throw ValidationException::withMessages(['cannot restore folder when parent folder is deleted']);
         }
         $folder->restore();
         return response()->json(['message' => 'Folder restored'],204);
+    }
+
+    public function download(Folder $folder)
+    {
+        $fs = new FolderService($folder);
+        $zip_file = $fs->zip();
+        return response()->download($zip_file);
     }
 
 }
