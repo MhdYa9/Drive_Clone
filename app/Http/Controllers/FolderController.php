@@ -143,6 +143,7 @@ class FolderController extends Controller
 
     public function download(Folder $folder)
     {
+        //$this->authorize($folder,'read');
         $fs = new FolderService($folder);
         $zip_file = $fs->zip();
         return response()->download($zip_file);

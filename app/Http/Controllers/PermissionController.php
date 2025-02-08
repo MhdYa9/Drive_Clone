@@ -11,15 +11,6 @@ use Illuminate\Support\Facades\Gate;
 class PermissionController extends Controller
 {
 
-
-
-    //when moving a folder
-
-    public function index(Folder $folder)
-    {
-
-    }
-
     /**
      * Store a newly created resource in storage.
      */

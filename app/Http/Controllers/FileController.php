@@ -143,8 +143,10 @@ class FileController extends Controller
         return response()->json(['message' => 'Folder restored'],204);
     }
 
-    public function download()
+    public function download(File $file)
     {
-
+        //$this->authorize($file->folder,'read');
+        $path = storage_path('app/'.$file->path);
+        return response()->download($path,$file->name);
     }
 }

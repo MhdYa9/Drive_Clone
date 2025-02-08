@@ -22,6 +22,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
     Route::get('/folders/{folder}/download',[FolderController::class,'download'])->name('folders.download');
+    Route::get('/files/{file}/download',[FileController::class,'download'])->name('files.download');
 Route::middleware('auth:sanctum')->group(function () {
     Route::put('/files/{file}/restore', [FileController::class, 'restore'])->name('files.restore');
     Route::apiResource('files', FileController::class);
