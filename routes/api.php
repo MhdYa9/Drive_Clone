@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\FileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FolderController;
@@ -21,6 +22,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::put('/files/{file}/restore', [FileController::class, 'restore'])->name('files.restore');
+    Route::apiResource('files', FileController::class);
     Route::get('/folders/search', [FolderController::class, 'search'])->name('folders.search');
     Route::apiResource('folders',FolderController::class);
     Route::post('/permissions',[PermissionController::class,'store'])->name('permissions.store');

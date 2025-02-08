@@ -17,6 +17,7 @@ class FolderResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'creator'=>$this->whenLoaded('user'),
             'subFolders' => FolderResource::collection($this->whenLoaded('subFolders')),
             'files' => FileResource::collection($this->whenLoaded('files'))
         ];

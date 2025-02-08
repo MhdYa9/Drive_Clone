@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException as ValidationException;
 
 class AuthController extends Controller
@@ -59,6 +60,8 @@ class AuthController extends Controller
             'name' => 'root'.$user->id,
             'user_id' => $user->id
         ]);
+
+        Storage::makeDirectory('private/'.$user->id);
 
         $root->usersPermissions()->attach([$user->id=>['permission'=>'drw']]);
 

@@ -9,8 +9,6 @@ use App\Rules\ValidParentFolder;
 use App\Services\FolderService;
 use App\Services\PermissionService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
@@ -145,7 +143,7 @@ class FolderController extends Controller
 
         $folder = Folder::where('id',$folder)->withTrashed()->first();
         $this->authorize('delete', $folder);
-        $hard_delete = request('hard_delete');
+        $hard_delete = request('hard_delete') == 1;
 
         $folder_service = new FolderService($folder);
         $folder_service->deleteSubTree(hard_delete:$hard_delete);
@@ -155,39 +153,14 @@ class FolderController extends Controller
 
     public function restore(int $folder){
 
+        //don't restore folder if parent deleted
         $folder = Folder::onlyTrashed()->find($folder);
         $this->authorize('delete', $folder);
+        if(Folder::where('id', $folder->parent_id)->onlyTrashed()->exists() !== null){
+            throw ValidationException::withMessages(['cannot restore folder when parent is deleted']);
+        }
         $folder->restore();
         return response()->json(['message' => 'Folder restored'],204);
     }
-
-    public function overwrite()
-    {
-        //TODO: complete this function
-    }
-
-    public function copy()
-    {
-        //TODO: complete this function
-    }
-
-    public function moveOwnership()
-    {
-        $data = request()->validate([
-            'user'=>'required|integer|exists:users,id',
-            'folder'=>'required|integer',
-        ]);
-
-        $folder = Folder::findOrFail($data['folder']);
-
-        Gate::authorize('isOwner',$folder);
-
-        $folder->update([
-            'user_id' => $data['user']
-        ]);
-
-        return response()->json(['message' => 'Folder updated']);
-    }
-
 
 }
